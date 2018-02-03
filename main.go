@@ -10,16 +10,12 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+const sizeX, sizeY = 100, 100
+const screenWidth, screenHeight = float64(1024), float64(768)
+
 func main() {
 	pixelgl.Run(run)
 }
-
-const sizeX, sizeY = 100, 100
-
-var grid [][]bool
-
-var screenWidth float64 = 1024
-var screenHeight float64 = 768
 
 func run() {
 	cfg := pixelgl.WindowConfig{
@@ -32,23 +28,21 @@ func run() {
 		panic(err)
 	}
 
-	grid = makeGrid(sizeX, sizeY)
-	populateGrid()
+	grid := newGrid(sizeX, sizeY)
+	populateGrid(grid)
 
 	for !win.Closed() {
 		grid = turnCrank(grid)
-		drawScreen(win)
+
+		win.Clear(colornames.Aliceblue)
+		drawGrid(win, grid)
+		win.Update()
 		time.Sleep(time.Second / 25)
 	}
 }
 
-func drawScreen(win *pixelgl.Window) {
-	win.Clear(colornames.Aliceblue)
-	drawGrid(win)
-	win.Update()
-}
-
-func makeGrid(w, h int) [][]bool {
+// newGrid creates an empty grid with the specified width and height.
+func newGrid(w, h int) [][]bool {
 	var newGrid [][]bool
 	newGrid = make([][]bool, w)
 	for index := range newGrid {
@@ -57,6 +51,7 @@ func makeGrid(w, h int) [][]bool {
 	return newGrid
 }
 
+// turnCrank applies Conway's crank to an existing grid and returns the next state as a new grid.
 func turnCrank(grid [][]bool) [][]bool {
 	var newGrid [][]bool
 	newGrid = make([][]bool, len(grid))
@@ -84,6 +79,7 @@ func turnCrank(grid [][]bool) [][]bool {
 	return newGrid
 }
 
+// countNeighbors returns the number of live neighbors for the given position in the provided grid.
 func countNeighbors(x, y int, grid [][]bool) int {
 	var neighbors = 0
 	if y > 0 {
@@ -117,7 +113,8 @@ func countNeighbors(x, y int, grid [][]bool) int {
 	return neighbors
 }
 
-func populateGrid() {
+// populateGrid randomly sets live cells in the provided grid.
+func populateGrid(grid [][]bool) {
 	rand.Seed(time.Now().Unix())
 	for i := 0; i < sizeX; i++ {
 		for j := 0; j < sizeY; j++ {
@@ -126,9 +123,11 @@ func populateGrid() {
 	}
 }
 
-func drawGrid(win *pixelgl.Window) {
+// drawGrid draws the provided grid to the specified window
+func drawGrid(win *pixelgl.Window, grid [][]bool) {
 	imd := imdraw.New(nil)
 	imd.Color = pixel.RGB(1, 0, 0)
+	screenWidth := win.Bounds().W()
 	width, height := screenWidth/sizeX, screenWidth/sizeY
 	for i := float64(0); i < sizeX; i++ {
 		for j := float64(0); j < sizeY; j++ {
