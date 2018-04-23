@@ -29,7 +29,7 @@ func run() {
 	}
 
 	grid := gameoflife.New(sizeX, sizeY)
-	grid.Populate(sizeX, sizeY)
+	grid.Populate()
 
 	for !win.Closed() {
 		grid = grid.TurnCrank()
@@ -42,19 +42,18 @@ func run() {
 }
 
 // drawGrid draws the provided grid to the specified window
-func drawGrid(win *pixelgl.Window, grid [][]bool) {
+func drawGrid(win *pixelgl.Window, grid gameoflife.Grid) {
 	imd := imdraw.New(nil)
 	imd.Color = pixel.RGB(1, 0, 0)
 	screenWidth := win.Bounds().W()
 	width, height := screenWidth/sizeX, screenWidth/sizeY
-	for i := float64(0); i < sizeX; i++ {
-		for j := float64(0); j < sizeY; j++ {
-			if grid[int(i)][int(j)] {
-				imd.Push(pixel.V(width*i, height*j))
-				imd.Push(pixel.V(width*i+width, height*j+height))
-				imd.Rectangle(0)
-			}
+	grid.Walk(func(x, y int, value bool) error {
+		if value {
+			imd.Push(pixel.V(width*float64(x), height*float64(y)))
+			imd.Push(pixel.V(width*float64(x)+width, height*float64(y)+height))
+			imd.Rectangle(0)
 		}
-	}
+		return nil
+	})
 	imd.Draw(win)
 }
