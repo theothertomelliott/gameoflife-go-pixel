@@ -5,6 +5,50 @@ import (
 	"testing"
 )
 
+func TestSizing(t *testing.T) {
+	var tests = []struct {
+		name           string
+		grid           Grid
+		expectedWidth  int
+		expectedHeight int
+	}{
+		{
+			name: "empty",
+		},
+		{
+			name: "1x1",
+			grid: Grid(
+				[][]bool{
+					{false},
+				},
+			),
+			expectedWidth:  1,
+			expectedHeight: 1,
+		},
+		{
+			name: "3x2",
+			grid: Grid(
+				[][]bool{
+					{false, false, false},
+					{false, false, false},
+				},
+			),
+			expectedWidth:  2,
+			expectedHeight: 3,
+		},
+	}
+	for _, test := range tests {
+		w := test.grid.Width()
+		if w != test.expectedWidth {
+			t.Errorf("width: expected %d, got %d", test.expectedWidth, w)
+		}
+		h := test.grid.Height()
+		if h != test.expectedHeight {
+			t.Errorf("height: expected %d, got %d", test.expectedHeight, h)
+		}
+	}
+}
+
 func TestConwaysCrank(t *testing.T) {
 	var tests = []struct {
 		name         string
